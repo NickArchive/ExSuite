@@ -1,5 +1,5 @@
 -- yeah youll need an exploit capable of supporting luau syntax to execute this
-local Debug = loadstring(game:HttpGet("https://github.com/LegitH3x0R/Roblox/raw/main/src/Lib/Debugger.lua"))()
+local Debug = loadstring(game:HttpGet("https://github.com/LegitH3x0R/ExSuite/raw/main/src/Lib/Debugger.lua"))()
 
 local Players = game:GetService("Players")
 local Player = Players.LocalPlayer

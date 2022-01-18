@@ -1,7 +1,7 @@
 -- SyntaxTools.lua
 -- Generic tools for the Lua syntax.
 
-local Table = loadstring(game:HttpGet("https://github.com/LegitH3x0R/Roblox/raw/main/src/Lib/TableTools.lua"))()
+local Table = loadstring(game:HttpGet("https://github.com/LegitH3x0R/ExSuite/raw/main/src/Lib/TableTools.lua"))()
 
 local Tools = {}
 Tools.Symbols = {} do
