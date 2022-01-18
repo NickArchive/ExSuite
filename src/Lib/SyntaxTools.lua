@@ -186,8 +186,8 @@ end
 
 function Tools.SerializeTable(t, Depth, Cache)
     if not Depth then
-        Cache = table.create(100)
-        Depth = 1
+        Cache = {}
+        Depth = 0
     end
 
     local Tab = string.rep("    ", Depth)
