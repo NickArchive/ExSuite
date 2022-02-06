@@ -43,7 +43,7 @@ end
 
 function Signal:Fire(...)
 	for i = 1, #self._Connections do
-		self._Connections[i]._Callback(...)
+		task.spawn(self._Connections[i]._Callback, ...)
 	end
 end
 
