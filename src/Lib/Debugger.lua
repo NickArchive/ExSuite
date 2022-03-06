@@ -1,48 +1,48 @@
-local ExecutedBefore = getreg()._DEBUGGING ~= nil
-getreg()._DEBUGGING = ExecutedBefore and getreg()._DEBUGGING or {
+local isDebugging = getreg()._DEBUGGING ~= nil
+getreg()._DEBUGGING = isDebugging and getreg()._DEBUGGING or {
     RemoteEvent = {},
     RemoteFunction = {},
     BindableEvent = {},
     BindableFunction = {}
-}; Debugging = getreg()._DEBUGGING
+}; debugRegistry = getreg()._DEBUGGING
 
-local function MakeHook(Method, Class) -- Cancer code below.
-    local Old; Old = hookfunction(Method, function(self, ...)
-        local Settings = Class[self]
-        if Settings and ((Settings.Caller == "Exploit" and checkcaller()) or (Settings.Caller == "Client" and not checkcaller()) or (Settings.Caller == nil or Settings.Caller == "Both")) then
-            local Args = {...}
-            if Settings.Callback then
-                local Res = { Settings.Callback(Args) }
-                if Settings.Override then return unpack(Res); end
+local function MakeHook(method, Class) -- Cancer code below.
+    local old; old = hookfunction(method, function(self, ...)
+        local hookSettings = Class[self]
+        if hookSettings and ((hookSettings.Caller == "Exploit" and checkcaller()) or (hookSettings.Caller == "Client" and not checkcaller()) or (hookSettings.Caller == nil or hookSettings.Caller == "Both")) then
+            local args = {...}
+            if hookSettings.Callback then
+                local res = { hookSettings.Callback(args) }
+                if hookSettings.Override then return unpack(res); end
             end
 
-            local Res = { Old(self, unpack(Args)) }
-            if Settings.PostCallback then task.spawn(Settings.PostCallback, Args, Res); end
+            local res = { old(self, unpack(args)) }
+            if hookSettings.PostCallback then task.spawn(hookSettings.PostCallback, args, res); end
 
-            return unpack(Res)
+            return unpack(res)
         end
 
-        return Old(self, ...)
+        return old(self, ...)
     end)
 end
 
-if not ExecutedBefore then
-    local Namecall; Namecall = hookmetamethod(game, "__namecall", function(self, ...)
+if not isDebugging then
+    local namecall; namecall = hookmetamethod(game, "__namecall", function(self, ...)
         if typeof(self) == "Instance" then
-            local Method = getnamecallmethod()
-            if (Method == "FireServer" and self.ClassName == "RemoteEvent") or (Method == "InvokeServer" and self.ClassName == "RemoteFunction") or (Method == "Fire" and self.ClassName == "BindableEvent") or (Method == "Invoke" and self.ClassName == "BindableFunction") then
-                return self[Method](self, ...) -- Laziness.
+            local method = getnamecallmethod()
+            if (method == "FireServer" and self.ClassName == "RemoteEvent") or (method == "InvokeServer" and self.ClassName == "RemoteFunction") or (method == "Fire" and self.ClassName == "BindableEvent") or (method == "Invoke" and self.ClassName == "BindableFunction") then
+                return self[method](self, ...) -- Laziness.
             end
         end
-        return Namecall(self, ...)
+        return namecall(self, ...)
     end)
 
-    MakeHook(Instance.new("RemoteEvent").FireServer, Debugging.RemoteEvent)
-    MakeHook(Instance.new("RemoteFunction").InvokeServer, Debugging.RemoteFunction) --PostCallback doesn't work for RemoteFunctions, but it works for BindableFunctions. No idea why.
-    MakeHook(Instance.new("BindableEvent").Fire, Debugging.BindableEvent)
-    MakeHook(Instance.new("BindableFunction").Invoke, Debugging.BindableFunction)
+    MakeHook(Instance.new("RemoteEvent").FireServer, debugRegistry.RemoteEvent)
+    MakeHook(Instance.new("RemoteFunction").InvokeServer, debugRegistry.RemoteFunction) -- PostCallback doesn't work for RemoteFunctions, but it works for BindableFunctions. No idea why.
+    MakeHook(Instance.new("BindableEvent").Fire, debugRegistry.BindableEvent)
+    MakeHook(Instance.new("BindableFunction").Invoke, debugRegistry.BindableFunction)
 end
 
-return function(Obj, Settings) -- You can only debug a remote once. If you call debug on it again, it'll overwrite the old settings.
-    Debugging[Obj.ClassName][Obj] = Settings
+return function(o, hookSettings) -- You can only debug a remote once. If you call debug on it again, it'll overwrite the old settings.
+    debugRegistry[o.ClassName][o] = hookSettings
 end

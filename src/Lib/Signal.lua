@@ -30,9 +30,9 @@ function Signal.new()
 end
 
 function Signal:Connect(f)
-	local Cn = Connection.new(self, f)
-	self._Connections[#self._Connections + 1] = Cn
-	return Cn
+	local cn = Connection.new(self, f)
+	self._Connections[#self._Connections + 1] = cn
+	return cn
 end
 
 function Signal:DisconnectAll()
@@ -48,12 +48,12 @@ function Signal:Fire(...)
 end
 
 function Signal:Wait()
-	local Thread, Cn = coroutine.running(), nil
-	Cn = self:Connect(function(...)
-		Cn:Disconnect()
-		task.spawn(Thread, ...)
+	local thread, cn = coroutine.running(), nil
+	cn = self:Connect(function(...)
+		cn:Disconnect()
+		task.spawn(thread, ...)
 	end)
-	return coroutine.yield(Thread)
+	return coroutine.yield(thread)
 end
 
 return Signal

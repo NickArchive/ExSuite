@@ -1,0 +1,11 @@
+{
+    "robloxLsp.diagnostics.globals": [
+        "getreg",
+        "hookfunction",
+        "checkcaller",
+        "hookmetamethod",
+        "getnamecallmethod",
+        "Drawing",
+        "newcclosure"
+    ]
+}

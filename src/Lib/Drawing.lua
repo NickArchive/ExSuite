@@ -2,6 +2,7 @@ local Drawing = setmetatable({}, { __index = Drawing })
 
 -- Header
 local RunService = game:GetService("RunService")
+local HttpService = game:GetService("HttpService")
 local Camera = workspace.Camera
 local WorldToViewportPoint = Camera.WorldToViewportPoint
 
@@ -13,34 +14,21 @@ local CFrame_Angles = CFrame.Angles
 local Vector3_new = Vector3.new
 local Vector2_new = Vector2.new
 
--- String Generation
-local Ascii = {}
-for i = 65, 90 do Ascii[#Ascii + 1] = string.char(i); end
-for i = 97, 122 do Ascii[#Ascii + 1] = string.char(i); end
-
-local function RandomString(Size)
-    local t = table.create(Size)
-    for i = 1, Size do
-        t[i] = Ascii[math.random(1, 50)]
-    end
-    return table.concat(t)
-end
-
 -- Math
-local function ToViewport(World)
-    local Pos, OnScreen = WorldToViewportPoint(Camera, World)
-    return Vector2_new(Pos.X, Pos.Y), Pos.Z, OnScreen -- Point, Depth, OnScreen
+local function ToViewport(world)
+    local pos, onScreen = WorldToViewportPoint(Camera, world)
+    return Vector2_new(pos.X, pos.Y), pos.Z, onScreen -- point, depth, onScreen
 end
 
-function Drawing.purge(Cache)
-    for i = #Cache, 1, -1 do
-        Cache[i]:Remove()
-        Cache[i] = nil
+function Drawing.purge(cache)
+    for i = #cache, 1, -1 do
+        cache[i]:Remove()
+        cache[i] = nil
     end
 end
 
-function Drawing.update(o, Props)
-    for k, v in pairs(Props) do
+function Drawing.update(o, props)
+    for k, v in pairs(props) do
         o[k] = v
     end
 end
@@ -54,7 +42,7 @@ Drawing.base = {
 
 function Drawing.getBase()
     return setmetatable({
-        Ticket = string.format("RID-%s", RandomString(15))
+        Ticket = string.format("drawObject-%s", HttpService:GenerateGUID(false))
     }, { __index = Drawing.base })
 end
 
@@ -87,24 +75,24 @@ function Drawing.newPlane()
         self._Quad.Thickness = self.Thickness
         self._Quad.Filled = self.Filled
 
-        local Origin = CFrame_new(self.Position)
-        self._Vertices[1] = Origin * Vector3_new(-self.Size.X, 0, self.Size.Y)
-        self._Vertices[2] = Origin * Vector3_new(self.Size.X, 0, self.Size.Y)
-        self._Vertices[3] = Origin * Vector3_new(self.Size.X, 0, -self.Size.Y)
-        self._Vertices[4] = Origin * Vector3_new(-self.Size.X, 0, -self.Size.Y)
+        local origin = CFrame_new(self.Position)
+        self._Vertices[1] = origin * Vector3_new(-self.Size.X, 0, self.Size.Y)
+        self._Vertices[2] = origin * Vector3_new(self.Size.X, 0, self.Size.Y)
+        self._Vertices[3] = origin * Vector3_new(self.Size.X, 0, -self.Size.Y)
+        self._Vertices[4] = origin * Vector3_new(-self.Size.X, 0, -self.Size.Y)
 
-        local SkipCalculations;
+        local skip;
         for i = 1, 4 do
-            local Depth, OnScreen;
-            self._Vertices[i], Depth, OnScreen = ToViewport(self._Vertices[i])
+            local depth, onScreen;
+            self._Vertices[i], depth, onScreen = ToViewport(self._Vertices[i])
 
-            if not OnScreen and Depth < 0 then
-                SkipCalculations = true
+            if not onScreen and depth < 0 then
+                skip = true
                 break;
             end
         end
 
-        if SkipCalculations then
+        if skip then
             self._Quad.Visible = false
             return;
         end
@@ -163,28 +151,28 @@ function Drawing.newCube()
             q.Filled = self.Filled
         end
 
-        local Origin = CFrame_new(self.Position) * CFrame_Angles(rad(self.Orientation.X), rad(self.Orientation.Y), rad(self.Orientation.Z))
-        self._Vertices[1] = Origin * Vector3_new(-self.Size.X, self.Size.Y, self.Size.Z)
-        self._Vertices[2] = Origin * Vector3_new(self.Size.X, self.Size.Y, self.Size.Z)
-        self._Vertices[3] = Origin * Vector3_new(self.Size.X, self.Size.Y, -self.Size.Z)
-        self._Vertices[4] = Origin * Vector3_new(-self.Size.X, self.Size.Y, -self.Size.Z)
-        self._Vertices[5] = Origin * Vector3_new(-self.Size.X, -self.Size.Y, self.Size.Z)
-        self._Vertices[6] = Origin * Vector3_new(self.Size.X, -self.Size.Y, self.Size.Z)
-        self._Vertices[7] = Origin * Vector3_new(self.Size.X, -self.Size.Y, -self.Size.Z)
-        self._Vertices[8] = Origin * Vector3_new(-self.Size.X, -self.Size.Y, -self.Size.Z)
+        local origin = CFrame_new(self.Position) * CFrame_Angles(rad(self.Orientation.X), rad(self.Orientation.Y), rad(self.Orientation.Z))
+        self._Vertices[1] = origin * Vector3_new(-self.Size.X, self.Size.Y, self.Size.Z)
+        self._Vertices[2] = origin * Vector3_new(self.Size.X, self.Size.Y, self.Size.Z)
+        self._Vertices[3] = origin * Vector3_new(self.Size.X, self.Size.Y, -self.Size.Z)
+        self._Vertices[4] = origin * Vector3_new(-self.Size.X, self.Size.Y, -self.Size.Z)
+        self._Vertices[5] = origin * Vector3_new(-self.Size.X, -self.Size.Y, self.Size.Z)
+        self._Vertices[6] = origin * Vector3_new(self.Size.X, -self.Size.Y, self.Size.Z)
+        self._Vertices[7] = origin * Vector3_new(self.Size.X, -self.Size.Y, -self.Size.Z)
+        self._Vertices[8] = origin * Vector3_new(-self.Size.X, -self.Size.Y, -self.Size.Z)
 
-        local SkipCalculations;
+        local skip;
         for i = 1, 8 do
-            local Depth, OnScreen;
-            self._Vertices[i], Depth, OnScreen = ToViewport(self._Vertices[i])
+            local depth, onScreen;
+            self._Vertices[i], depth, onScreen = ToViewport(self._Vertices[i])
 
-            if not OnScreen and Depth < 0 then
-                SkipCalculations = true
+            if not onScreen and depth < 0 then
+                skip = true
                 break;
             end
         end
 
-        if SkipCalculations then
+        if skip then
             for i = 1, 6 do
                 self["_Quad"..i].Visible = false
             end
@@ -240,16 +228,16 @@ Drawing.new = newcclosure(function(ClassName)
 end)
 
 --[[
-local Cyoob = Drawing.newCube()
-Cyoob.Visible = true
-Cyoob.Size = Vector3.new(5, 5, 5)
-Cyoob.Position = Vector3.new(0, 10, 0)
+local cube = Drawing.newCube()
+cube.Visible = true
+cube.Size = Vector3.new(5, 5, 5)
+cube.Position = Vector3.new(0, 10, 0)
 
 local i = 0
-RunService.RenderStepped:Connect(function()
+game:GetService("RunService").RenderStepped:Connect(function()
     i += 1
     if i == 360 then i = 0; end
-    Cyoob.Orientation = Vector3.new(i, 0, -i)
+    cube.Orientation = Vector3.new(i, 0, -i)
 end)]]
 
 return Drawing
