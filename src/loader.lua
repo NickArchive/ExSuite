@@ -27,8 +27,11 @@ else
     loadLibrary = function(module)
         local args = meta.cached[module]
         if not args then
+            print("not cached", module)
             args = { loadstring(game:HttpGet(("%s/src/lib/%s.lua"):format(base, module)))() }
             meta.cached[module] = args
+        else
+            print("cached", module)
         end
         return unpack(args)
     end
