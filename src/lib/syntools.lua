@@ -78,10 +78,10 @@ end
 function syntools.getInstancePath(inst) -- Because GetFullName is trash.
     local path = ""
     repeat
-        if syntools.IsValidVar(inst.name) then
+        if syntools.isValidVar(inst.name) then
             path = string.format(".%s%s", inst.name, path)
         else
-            path = string.format("[%s]%s", syntools.SerializeString(inst.name), path)
+            path = string.format("[%s]%s", syntools.serializeString(inst.name), path)
         end
         inst = inst.Parent
     until inst == nil or inst.Parent == game -- There's two cases: The root is going to be either DataModel (game) or nil.
@@ -100,7 +100,7 @@ function syntools.serialize(value)
 	if vType == "nil" then
 		return vType
 	elseif vType == "string" then
-		return syntools.SerializeString(value)
+		return syntools.serializeString(value)
     elseif vType == "number" then
         if math.floor(value) ~= value then
             value = string.format("%.2f", value)
@@ -131,9 +131,9 @@ function syntools.serialize(value)
         return syntools.SerializeTable(value)
     elseif vType == "function" then
         local name = debug.getinfo(value).name
-        return string.format("Function(%s)", syntools.SerializeString((name == "") and "anonymous function" or name))
+        return string.format("Function(%s)", syntools.serializeString((name == "") and "anonymous function" or name))
 	elseif vType == "Instance" then
-        return syntools.GetInstancePath(value)
+        return syntools.getInstancePath(value)
 	elseif vType == "Vector2" then
 		return string.format("Vector2.new(%s, %s)", syntools.serialize(value.X), syntools.serialize(value.Y))
     elseif vType == "Vector2int16" then
@@ -180,7 +180,7 @@ function syntools.serialize(value)
         return string.format("FuzzyRegion3(%s, %s) --[[ Center, Area ]]", syntools.serialize(value.CFrame), syntools.serialize(value.Size))
 	end
 
-	return string.format("unk(\"%s\", %s)", vType, syntools.SerializeString(tostring(value)))
+	return string.format("unk(\"%s\", %s)", vType, syntools.serializeString(tostring(value)))
 end
 
 function syntools.serializeTable(t, depth, cache)

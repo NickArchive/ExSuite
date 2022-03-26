@@ -36,10 +36,8 @@ end
 rawset(callEnv, "loadLibrary", loadLibrary)
 
 if loadSettings.loadEnv then
-    local env = HttpService:JSONDecode(game:HttpGet(("%s/src/env.json"):format(base)))
+    local env = loadSettings.dev and HttpService:JSONDecode(readfile(".projects/ExSuite/src/env.json")) or HttpService:JSONDecode(game:HttpGet(("%s/src/env.json"):format(base)))
     for k, v in pairs(env) do
         rawset(callEnv, k, loadLibrary(v))
     end
 end
-
-return loadLibrary
