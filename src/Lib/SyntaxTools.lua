@@ -1,7 +1,7 @@
 -- Syntaxsyntools.lua
 -- Generic syntools for the Lua syntax.
 
-local table = loadstring(game:HttpGet("https://github.com/LegitH3x0R/ExSuite/raw/main/src/Lib/Tablesyntools.lua"))()
+local table = loadstring(game:HttpGet("https://github.com/LegitH3x0R/ExSuite/raw/main/src/Lib/TableTools.lua"))()
 
 local syntools = {}
 syntools.Symbols = {} do
