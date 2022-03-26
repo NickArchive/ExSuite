@@ -218,13 +218,17 @@ function Drawing.newCube()
     return self
 end
 
-Drawing.new = newcclosure(function(ClassName)
-    if ClassName == "Plane" then
-        return Drawing.newPlane()
-    elseif ClassName == "Cube" then
-        return Drawing.newCube()
+local classMap = {
+    Plane = Drawing.newPlane,
+    Cube = Drawing.newCube
+}
+
+Drawing_oldNew = hookfunction(Drawing.new, function(className, ...)
+    local f = classMap[className]
+    if f then
+        return f(...)
     end
-    return Drawing_new(ClassName)
+    return Drawing_oldNew(className, ...)
 end)
 
 --[[

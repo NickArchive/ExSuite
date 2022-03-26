@@ -1,11 +1,11 @@
--- SyntaxTools.lua
--- Generic tools for the Lua syntax.
+-- Syntaxsyntools.lua
+-- Generic syntools for the Lua syntax.
 
-local table = loadstring(game:HttpGet("https://github.com/LegitH3x0R/ExSuite/raw/main/src/Lib/TableTools.lua"))()
+local table = loadstring(game:HttpGet("https://github.com/LegitH3x0R/ExSuite/raw/main/src/Lib/Tablesyntools.lua"))()
 
-local Tools = {}
-Tools.Symbols = {} do
-    Tools.Symbols.IdentFirst = table.lookupify {
+local syntools = {}
+syntools.Symbols = {} do
+    syntools.Symbols.IdentFirst = table.lookupify {
         'a', 'b', 'c', 'd', 'e',
         'f', 'g', 'h', 'i', 'j',
         'k', 'l', 'm', 'n', 'o',
@@ -19,7 +19,7 @@ Tools.Symbols = {} do
         'Y', 'Z', '_',
     }
 
-    Tools.Symbols.Ident = table.lookupify {
+    syntools.Symbols.Ident = table.lookupify {
         '0', '1', '2', '3', '4',
         '4', '6', '7', '8', '9',
         'a', 'b', 'c', 'd', 'e',
@@ -35,30 +35,30 @@ Tools.Symbols = {} do
         'Y', 'Z', '_',
     }
 
-    Tools.Symbols.Numbers = table.lookupify {
+    syntools.Symbols.Numbers = table.lookupify {
         '0', '1', '2', '3', '4',
         '4', '6', '7', '8', '9',
     }
 
-    Tools.Symbols.Escapes = table.lookupify {
+    syntools.Symbols.Escapes = table.lookupify {
         '\a', '\b', '\f', '\n', '\r',
         '\v'
     }
 
-    Tools.Symbols.EscapeMap = table.lookupify {
+    syntools.Symbols.EscapeMap = table.lookupify {
         'a', 'b', 'f', 'n', 'r',
         'v'
     }
 end
 
-function Tools.isValidVar(name)
+function syntools.isValidVar(name)
     local c = string.sub(name, 1, 1)
-    if not Tools.Symbols.IdentFirst[c] or Tools.Symbols.Numbers[c] then
+    if not syntools.Symbols.IdentFirst[c] or syntools.Symbols.Numbers[c] then
         return false
     end
 
     for i = 2, #name do
-        if not Tools.Symbols.Ident[string.sub(name, i, i)] then
+        if not syntools.Symbols.Ident[string.sub(name, i, i)] then
             return false
         end
     end
@@ -66,23 +66,23 @@ function Tools.isValidVar(name)
     return true
 end
 
-function Tools.serializeString(str)
+function syntools.serializeString(str)
     return string.gsub(string.format("%q", str), ".", function(c)
-        if Tools.Symbols.Escapes[c] then
-            return Tools.Symbols.EscapeMap[Tools.Symbols.Escapes[c]]
+        if syntools.Symbols.Escapes[c] then
+            return syntools.Symbols.EscapeMap[syntools.Symbols.Escapes[c]]
         end
 
         return c
     end)
 end
 
-function Tools.getInstancePath(inst) -- Because GetFullName is trash.
+function syntools.getInstancePath(inst) -- Because GetFullName is trash.
     local path = ""
     repeat
-        if Tools.IsValidVar(inst.name) then
+        if syntools.IsValidVar(inst.name) then
             path = string.format(".%s%s", inst.name, path)
         else
-            path = string.format("[%s]%s", Tools.SerializeString(inst.name), path)
+            path = string.format("[%s]%s", syntools.SerializeString(inst.name), path)
         end
         inst = inst.Parent
     until inst == nil or inst.Parent == game -- There's two cases: The root is going to be either DataModel (game) or nil.
@@ -96,12 +96,12 @@ function Tools.getInstancePath(inst) -- Because GetFullName is trash.
     return "game:GetService(\""..inst.ClassName.."\")"..path
 end
 
-function Tools.serialize(value)
+function syntools.serialize(value)
 	local vType = typeof(value)
 	if vType == "nil" then
 		return vType
 	elseif vType == "string" then
-		return Tools.SerializeString(value)
+		return syntools.SerializeString(value)
     elseif vType == "number" then
         if math.floor(value) ~= value then
             value = string.format("%.2f", value)
@@ -129,38 +129,38 @@ function Tools.serialize(value)
         local addr = tonumber(string.split(tostring(value), ": 0x")[2], 16)
         return string.format("Userdata(0x%x)", addr)
     elseif vType == "table" then
-        return Tools.SerializeTable(value)
+        return syntools.SerializeTable(value)
     elseif vType == "function" then
         local name = debug.getinfo(value).name
-        return string.format("Function(%s)", Tools.SerializeString((name == "") and "anonymous function" or name))
+        return string.format("Function(%s)", syntools.SerializeString((name == "") and "anonymous function" or name))
 	elseif vType == "Instance" then
-        return Tools.GetInstancePath(value)
+        return syntools.GetInstancePath(value)
 	elseif vType == "Vector2" then
-		return string.format("Vector2.new(%s, %s)", Tools.serialize(value.X), Tools.serialize(value.Y))
+		return string.format("Vector2.new(%s, %s)", syntools.serialize(value.X), syntools.serialize(value.Y))
     elseif vType == "Vector2int16" then
-        return string.format("Vector2int16.new(%s, %s)", Tools.serialize(value.X), Tools.serialize(value.Y))
+        return string.format("Vector2int16.new(%s, %s)", syntools.serialize(value.X), syntools.serialize(value.Y))
 	elseif vType == "Vector3" then
-		return string.format("Vector3.new(%s, %s, %s)", Tools.serialize(value.X), Tools.serialize(value.Y), Tools.serialize(value.Z))
+		return string.format("Vector3.new(%s, %s, %s)", syntools.serialize(value.X), syntools.serialize(value.Y), syntools.serialize(value.Z))
     elseif vType == "Vector3int16" then
-        return string.format("Vector3int16.new(%s, %s, %s)", Tools.serialize(value.X), Tools.serialize(value.Y), Tools.serialize(value.Z))
+        return string.format("Vector3int16.new(%s, %s, %s)", syntools.serialize(value.X), syntools.serialize(value.Y), syntools.serialize(value.Z))
     elseif vType == "CFrame" then
         local rX, rY, rZ = value:ToOrientation()
         if rX == 0 and rY == 0 and rZ == 0 then
-            return string.format("CFrame.new(%s, %s, %s)", Tools.serialize(value.X), Tools.serialize(value.Y), Tools.serialize(value.Z))
+            return string.format("CFrame.new(%s, %s, %s)", syntools.serialize(value.X), syntools.serialize(value.Y), syntools.serialize(value.Z))
         end
 
         return string.format("CFrame.new(%s, %s, %s) * CFrame.Angles(math.rad(%s), math.rad(%s), math.rad(%s))",
-            Tools.serialize(value.X), Tools.serialize(value.Y), Tools.serialize(value.Z),
-            Tools.serialize(math.deg(rX)), Tools.serialize(math.deg(rY)), Tools.serialize(math.deg(rZ))
+            syntools.serialize(value.X), syntools.serialize(value.Y), syntools.serialize(value.Z),
+            syntools.serialize(math.deg(rX)), syntools.serialize(math.deg(rY)), syntools.serialize(math.deg(rZ))
         )
     elseif vType == "UDim" then
-        return string.format("UDim.new(%s, %s)", Tools.serialize(value.Scale), Tools.serialize(value.Offset))
+        return string.format("UDim.new(%s, %s)", syntools.serialize(value.Scale), syntools.serialize(value.Offset))
     elseif vType == "UDim2" then
-        return string.format("UDim2.new(%s, %s, %s, %s)", Tools.serialize(value.X.Scale), Tools.serialize(value.X.Offset), Tools.serialize(value.Y.Scale), Tools.serialize(value.Y.Offset))
+        return string.format("UDim2.new(%s, %s, %s, %s)", syntools.serialize(value.X.Scale), syntools.serialize(value.X.Offset), syntools.serialize(value.Y.Scale), syntools.serialize(value.Y.Offset))
     elseif vType == "BrickColor" then
         return string.format("BrickColor.new(%q)", value.name)
     elseif vType == "Color3" then
-        return string.format("Color3.fromRGB(%s, %s, %s)", Tools.serialize(value.R * 0xFF), Tools.serialize(value.G * 0xFF), Tools.serialize(value.B * 0xFF))
+        return string.format("Color3.fromRGB(%s, %s, %s)", syntools.serialize(value.R * 0xFF), syntools.serialize(value.G * 0xFF), syntools.serialize(value.B * 0xFF))
     elseif vType == "DateTime" then
         return string.format("DateTime.fromIsoDate(%q)", value:ToIsoDate())
         --local utc = value:ToUniversalTime()
@@ -172,51 +172,51 @@ function Tools.serialize(value)
     elseif vType == "EnumItem" then
         return tostring(value)
     elseif vType == "Ray" then
-        return string.format("Ray.new(%s, %s)", Tools.serialize(value.Origin), Tools.serialize(value.Direction))
+        return string.format("Ray.new(%s, %s)", syntools.serialize(value.Origin), syntools.serialize(value.Direction))
     elseif vType == "RBXScriptSignal" then -- Possible guess functionality??
         return string.format("Signal(%q)", string.split(tostring(value), " ")[2])
     elseif vType == "RBXScriptConnection" then -- Maybe scan GC for relative connections?
         return "Connection()"
     elseif vType == "Region3" then -- I'm failing to do simple math so ill just put fuzzy here.
-        return string.format("FuzzyRegion3(%s, %s) --[[ Center, Area ]]", Tools.serialize(value.CFrame), Tools.serialize(value.Size))
+        return string.format("FuzzyRegion3(%s, %s) --[[ Center, Area ]]", syntools.serialize(value.CFrame), syntools.serialize(value.Size))
 	end
 
-	return string.format("unk(\"%s\", %s)", vType, Tools.SerializeString(tostring(value)))
+	return string.format("unk(\"%s\", %s)", vType, syntools.SerializeString(tostring(value)))
 end
 
-function Tools.serializeTable(t, depth, cache)
+function syntools.serializeTable(t, depth, cache)
     if not depth then
         cache = {}
         depth = 0
     end
 
-    local Tab = string.rep("    ", depth)
-    local Tab2, Dump = "    "..Tab, "{\n"
+    local tab = string.rep("    ", depth)
+    local tab2, tblDump = "    "..tab, "{\n"
     for k, v in pairs(t) do
-        local Key = (type(k) ~= "table") and Tools.serialize(k) or string.format("table(%q)", tostring(k))
+        local key = (type(k) ~= "table") and syntools.serialize(k) or string.format("table(%q)", tostring(k))
         if type(v) == "table" then
             if table.find(cache, v) then
-                Dump = Dump..string.format("%s[%s] = CyclicTable(%q),\n", Tab2, Key, tostring(v))
+                tblDump = tblDump..string.format("%s[%s] = CyclicTable(%q),\n", tab2, key, tostring(v))
                 continue;
             end
 
             cache[#cache + 1] = v
-            Dump = Dump..string.format("%s[%s] = %s,\n", Tab2, Key, Tools.serializeTable(v, depth + 1, cache))
+            tblDump = tblDump..string.format("%s[%s] = %s,\n", tab2, key, syntools.serializeTable(v, depth + 1, cache))
             continue;
         end
-        Dump = Dump..string.format("%s[%s] = %s,\n", Tab2, Key, Tools.serialize(v))
+        tblDump = tblDump..string.format("%s[%s] = %s,\n", tab2, key, syntools.serialize(v))
     end
 
-    return Dump..Tab.."}"
+    return tblDump..tab.."}"
 end
 
-function Tools.serializeUnpacked(...)
+function syntools.serializeUnpacked(...)
     local Serialized = ""
     for _, o in ipairs({...}) do
-        Serialized = Serialized..Tools.serialize(o)..", "
+        Serialized = Serialized..syntools.serialize(o)..", "
     end
 
     return string.sub(Serialized, 1, -3)
 end
 
-return Tools
+return syntools
