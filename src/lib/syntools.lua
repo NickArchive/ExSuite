@@ -1,11 +1,11 @@
--- Syntaxsyntools.lua
--- Generic syntools for the Lua syntax.
+-- syntools.lua
+-- Generic Lua syntax tools.
 
-local table = loadstring(game:HttpGet("https://github.com/LegitH3x0R/ExSuite/raw/main/src/Lib/TableTools.lua"))()
+local table = loadLibrary("table")
 
 local syntools = {}
-syntools.Symbols = {} do
-    syntools.Symbols.IdentFirst = table.lookupify {
+syntools.symbols = {} do
+    syntools.symbols.identFirst = table.lookupify {
         'a', 'b', 'c', 'd', 'e',
         'f', 'g', 'h', 'i', 'j',
         'k', 'l', 'm', 'n', 'o',
@@ -19,7 +19,7 @@ syntools.Symbols = {} do
         'Y', 'Z', '_',
     }
 
-    syntools.Symbols.Ident = table.lookupify {
+    syntools.symbols.ident = table.lookupify {
         '0', '1', '2', '3', '4',
         '4', '6', '7', '8', '9',
         'a', 'b', 'c', 'd', 'e',
@@ -35,17 +35,17 @@ syntools.Symbols = {} do
         'Y', 'Z', '_',
     }
 
-    syntools.Symbols.Numbers = table.lookupify {
+    syntools.symbols.numbers = table.lookupify {
         '0', '1', '2', '3', '4',
         '4', '6', '7', '8', '9',
     }
 
-    syntools.Symbols.Escapes = table.lookupify {
+    syntools.symbols.escapes = table.lookupify {
         '\a', '\b', '\f', '\n', '\r',
         '\v'
     }
 
-    syntools.Symbols.EscapeMap = table.lookupify {
+    syntools.symbols.escapeMap = table.lookupify {
         'a', 'b', 'f', 'n', 'r',
         'v'
     }
@@ -53,12 +53,12 @@ end
 
 function syntools.isValidVar(name)
     local c = string.sub(name, 1, 1)
-    if not syntools.Symbols.IdentFirst[c] or syntools.Symbols.Numbers[c] then
+    if not syntools.symbols.identFirst[c] or syntools.symbols.numbers[c] then
         return false
     end
 
     for i = 2, #name do
-        if not syntools.Symbols.Ident[string.sub(name, i, i)] then
+        if not syntools.symbols.ident[string.sub(name, i, i)] then
             return false
         end
     end
@@ -68,10 +68,9 @@ end
 
 function syntools.serializeString(str)
     return string.gsub(string.format("%q", str), ".", function(c)
-        if syntools.Symbols.Escapes[c] then
-            return syntools.Symbols.EscapeMap[syntools.Symbols.Escapes[c]]
+        if syntools.symbols.escapes[c] then
+            return syntools.symbols.escapeMap[syntools.symbols.escapes[c]]
         end
-
         return c
     end)
 end

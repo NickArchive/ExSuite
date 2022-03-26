@@ -1,3 +1,6 @@
+-- drawing.lua
+-- Drawing library extensions.
+
 local Drawing = setmetatable({}, { __index = Drawing })
 
 -- Header

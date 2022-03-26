@@ -1,3 +1,6 @@
+-- signal.lua
+-- Thread-based signaling for Lua.
+
 local Connection = {}
 Connection.MT = {
 	__index = Connection,

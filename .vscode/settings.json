@@ -6,6 +6,9 @@
         "hookmetamethod",
         "getnamecallmethod",
         "Drawing",
-        "newcclosure"
+        "newcclosure",
+        "readfile",
+        "writefile",
+        "loadLibrary"
     ]
 }

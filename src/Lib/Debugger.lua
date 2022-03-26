@@ -1,3 +1,6 @@
+-- debugger.lua
+-- Event/Invokable debugger.
+
 local isDebugging = getreg()._DEBUGGING ~= nil
 getreg()._DEBUGGING = isDebugging and getreg()._DEBUGGING or {
     RemoteEvent = {},

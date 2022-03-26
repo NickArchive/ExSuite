@@ -1,4 +1,7 @@
-local Signal = loadstring(game:HttpGet("https://raw.githubusercontent.com/LegitH3x0R/ExSuite/main/src/Lib/Signal.lua"))()
+-- scheduler.lua
+-- Queue-based asynchronous task scheduler
+
+local Signal = loadLibrary("signal")
 local Scheduler = {}
 Scheduler.MT = {
     __index = Scheduler
@@ -17,7 +20,7 @@ function Scheduler:Add(f, p)
     if type(p) == "number" then
         table.insert(self._Queue, p, f)
         return;
-    elseif type(p) == "boolean" then
+    elseif p == true then
         table.insert(self._Queue, 1, f)
         return;
     end
