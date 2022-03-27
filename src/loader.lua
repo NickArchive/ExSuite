@@ -18,24 +18,16 @@ if not meta then
     reg.exSuiteMeta = meta
 end
 
-local function getSafeEnv()
-    local env = {}
-    for k, v in pairs(getgenv()) do
-        env[k] = v
-    end
-    return env
-end
-
 local loadLibrary;
 if loadSettings.dev then
     loadLibrary = function(module) -- Bypass caching for fast testing.
-        return setfenv(loadstring(readfile((".projects/ExSuite/src/lib/%s.lua"):format(module))), getSafeEnv())() -- I do this to have isolation.
+        return loadstring(readfile((".projects/ExSuite/src/lib/%s.lua"):format(module)))()
     end
 else
     loadLibrary = function(module)
         local args = meta.cached[module]
         if not args then
-            args = { setfenv(loadstring(game:HttpGet(("%s/src/lib/%s.lua"):format(base, module))), getSafeEnv())() }
+            args = { loadstring(game:HttpGet(("%s/src/lib/%s.lua"):format(base, module)))() }
             meta.cached[module] = args
         end
         return unpack(args)
