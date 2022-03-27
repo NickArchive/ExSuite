@@ -1,5 +1,17 @@
 -- debugger.lua
--- Event/Invokable debugger.
+
+--[[local debugger = {}
+function debugger.spy(o)
+
+end
+
+function debugger.detour(o, hookSettings)
+
+end
+
+namecall = hookmetamethod(game, "__namecall", function(self, ...)
+
+end)]]
 
 local isDebugging = getreg()._DEBUGGING ~= nil
 getreg()._DEBUGGING = isDebugging and getreg()._DEBUGGING or {

@@ -128,7 +128,7 @@ function syntools.serialize(value)
         local addr = tonumber(string.split(tostring(value), ": 0x")[2], 16)
         return string.format("Userdata(0x%x)", addr)
     elseif vType == "table" then
-        return syntools.SerializeTable(value)
+        return syntools.serializeTable(value)
     elseif vType == "function" then
         local name = debug.getinfo(value).name
         return string.format("Function(%s)", syntools.serializeString((name == "") and "anonymous function" or name))
