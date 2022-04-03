@@ -24,7 +24,8 @@ if loadSettings.dev then
         return loadstring(readfile((".projects/ExSuite/src/lib/%s.lua"):format(module)))()
     end
 else
-    loadLibrary = function(module)
+    loadLibrary = function(module, noCache)
+        if noCache then return loadstring(game:HttpGet(("%s/src/lib/%s.lua"):format(base, module)))() end
         local args = meta.cached[module]
         if not args then
             args = { loadstring(game:HttpGet(("%s/src/lib/%s.lua"):format(base, module)))() }
