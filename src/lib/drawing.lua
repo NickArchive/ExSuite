@@ -84,11 +84,9 @@ function Drawing.newPlane()
         self._Vertices[3] = origin * Vector3_new(self.Size.X, 0, -self.Size.Y)
         self._Vertices[4] = origin * Vector3_new(-self.Size.X, 0, -self.Size.Y)
 
-        local skip;
+        local skip, depth, onScreen;
         for i = 1, 4 do
-            local depth, onScreen;
             self._Vertices[i], depth, onScreen = ToViewport(self._Vertices[i])
-
             if not onScreen and depth < 0 then
                 skip = true
                 break;
@@ -164,11 +162,10 @@ function Drawing.newCube()
         self._Vertices[7] = origin * Vector3_new(self.Size.X, -self.Size.Y, -self.Size.Z)
         self._Vertices[8] = origin * Vector3_new(-self.Size.X, -self.Size.Y, -self.Size.Z)
 
-        local skip;
+        local skip, depth, onScreen;
         for i = 1, 8 do
-            local depth, onScreen;
-            self._Vertices[i], depth, onScreen = ToViewport(self._Vertices[i])
 
+            self._Vertices[i], depth, onScreen = ToViewport(self._Vertices[i])
             if not onScreen and depth < 0 then
                 skip = true
                 break;
@@ -226,13 +223,13 @@ local classMap = {
     Cube = Drawing.newCube
 }
 
-Drawing_oldNew = hookfunction(Drawing.new, function(className, ...)
+function Drawing.new(className, ...)
     local f = classMap[className]
     if f then
         return f(...)
     end
-    return Drawing_oldNew(className, ...)
-end)
+    return Drawing_new(className, ...)
+end
 
 --[[
 local cube = Drawing.newCube()

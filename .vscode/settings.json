@@ -9,6 +9,7 @@
         "newcclosure",
         "readfile",
         "writefile",
-        "loadLibrary"
+        "loadLibrary",
+        "getgenv"
     ]
 }

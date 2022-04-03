@@ -1,63 +1,51 @@
 -- debugger.lua
 
---[[local debugger = {}
-function debugger.spy(o)
+local debugger = {}
+debugger._Detouring = setmetatable({}, { __mode = "k" })
+
+function debugger.detourMethod(o, f, detour)
+    local detourInfo = {}
+    detourInfo.Type = "method"
+    detourInfo.Source = o
+    detourInfo.Closure = type(f) == "string" and o[f] or f
+    detourInfo.Hook = detour
+
+    function detourInfo:Join()
+        self.BaseClosure = hookfunction(self.Closure, self.Hook)
+        debugger._Detouring[self.Source] = self
+    end
+
+    function detourInfo:Disband()
+        hookfunction(self.Closure, self.BaseClosure)
+        debugger._Detouring[self.Source] = nil
+    end
+
+    detourInfo:Join()
+    return detourInfo
+end
+
+function debugger.detourRemote(o, detour)
 
 end
 
-function debugger.detour(o, hookSettings)
-
-end
-
-namecall = hookmetamethod(game, "__namecall", function(self, ...)
-
-end)]]
-
-local isDebugging = getreg()._DEBUGGING ~= nil
-getreg()._DEBUGGING = isDebugging and getreg()._DEBUGGING or {
-    RemoteEvent = {},
-    RemoteFunction = {},
-    BindableEvent = {},
-    BindableFunction = {}
-}; debugRegistry = getreg()._DEBUGGING
-
-local function MakeHook(method, Class) -- Cancer code below.
-    local old; old = hookfunction(method, function(self, ...)
-        local hookSettings = Class[self]
-        if hookSettings and ((hookSettings.Caller == "Exploit" and checkcaller()) or (hookSettings.Caller == "Client" and not checkcaller()) or (hookSettings.Caller == nil or hookSettings.Caller == "Both")) then
-            local args = {...}
-            if hookSettings.Callback then
-                local res = { hookSettings.Callback(args) }
-                if hookSettings.Override then return unpack(res); end
-            end
-
-            local res = { old(self, unpack(args)) }
-            if hookSettings.PostCallback then task.spawn(hookSettings.PostCallback, args, res); end
-
-            return unpack(res)
-        end
-
-        return old(self, ...)
+do
+    local detouring = debugger._Detouring
+    local index, namecall;
+    index = hookmetamethod(game, "__index", function(self, key)
+        return index(self, key)
     end)
-end
 
-if not isDebugging then
-    local namecall; namecall = hookmetamethod(game, "__namecall", function(self, ...)
-        if typeof(self) == "Instance" then
-            local method = getnamecallmethod()
-            if (method == "FireServer" and self.ClassName == "RemoteEvent") or (method == "InvokeServer" and self.ClassName == "RemoteFunction") or (method == "Fire" and self.ClassName == "BindableEvent") or (method == "Invoke" and self.ClassName == "BindableFunction") then
-                return self[method](self, ...) -- Laziness.
+    namecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local detourInfo = detouring[self]
+        if detourInfo and detourInfo.Type == "method" and detourInfo.Source == self then
+            local methodName = getnamecallmethod()
+            local method = index(self, methodName)
+            if detourInfo.Closure == method then
+                return method(self, ...)
             end
         end
         return namecall(self, ...)
     end)
-
-    MakeHook(Instance.new("RemoteEvent").FireServer, debugRegistry.RemoteEvent)
-    MakeHook(Instance.new("RemoteFunction").InvokeServer, debugRegistry.RemoteFunction) -- PostCallback doesn't work for RemoteFunctions, but it works for BindableFunctions. No idea why.
-    MakeHook(Instance.new("BindableEvent").Fire, debugRegistry.BindableEvent)
-    MakeHook(Instance.new("BindableFunction").Invoke, debugRegistry.BindableFunction)
 end
 
-return function(o, hookSettings) -- You can only debug a remote once. If you call debug on it again, it'll overwrite the old settings.
-    debugRegistry[o.ClassName][o] = hookSettings
-end
+return debugger
